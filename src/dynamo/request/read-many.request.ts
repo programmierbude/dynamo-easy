@@ -2,7 +2,6 @@
  * @module store-requests
  */
 import * as DynamoDB from '@aws-sdk/client-dynamodb'
-import * as DynamoDBv2 from '../../aws-sdk-v2.types'
 import { SecondaryIndex } from '../../decorator/impl/index/secondary-index'
 import { fetchAll } from '../../helper/fetch-all.function'
 import { promiseTap } from '../../helper/promise-tap.function'
@@ -59,7 +58,7 @@ export abstract class ReadManyRequest<
    * @param key A map representing the start id which is included in next call, if null is delivered
    * startKey will be removed from params
    */
-  exclusiveStartKey(key: DynamoDBv2.Key | null): this {
+  exclusiveStartKey(key: Record<string, DynamoDB.AttributeValue> | null): this {
     // TODO ENHANCEMENT exclusiveStartKey(item: Partial<T>)
     if (key) {
       this.params.ExclusiveStartKey = key

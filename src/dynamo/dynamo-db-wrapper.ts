@@ -58,11 +58,4 @@ export class DynamoDbWrapper {
 
     return dynamoEasyConfig.sessionValidityEnsurer().then(() => this.dynamoDB.query(params))
   }
-
-  /*
-   * TODO v3: check for replacement. DynamoDB.executeStatement is now used to execute statements using PartiQL
-   */
-  // makeRequest(operation: string, params?: Record<string, any>): Promise<any> {
-  //   return dynamoEasyConfig.sessionValidityEnsurer().then(() => this.dynamoDB.executeStatement(operation as any, params))
-  // }
 }

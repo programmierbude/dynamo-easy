@@ -90,15 +90,6 @@ describe('dynamo store', () => {
       expect(store.transactGet([{ id: 'myId' }]) instanceof TransactGetSingleTableRequest).toBeTruthy())
   })
 
-  // TODO v3: possibly remove when we decided on how to proceed with DynamoDbWrapper.makeRequest
-  // xdescribe('should enable custom requests', () => {
-  //   const makeRequestSpy = jest.fn().mockReturnValue(Promise.resolve())
-  //   const store = new DynamoStore(SimpleWithPartitionKeyModel, dynamoDB)
-  //   Object.assign(store, { dynamoDBWrapper: { makeRequest: makeRequestSpy } })
-  //   store.makeRequest('updateTimeToLive', {})
-  //   expect(makeRequestSpy).toBeCalled()
-  // })
-
   describe('allow to get dynamoDB instance', () => {
     const store = new DynamoStore(SimpleWithPartitionKeyModel, new DynamoDB.DynamoDB({}))
     expect(store.dynamoDB).toBeDefined()

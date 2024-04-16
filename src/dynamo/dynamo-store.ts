@@ -80,14 +80,4 @@ export class DynamoStore<T> {
   transactGet(keys: Array<Partial<T>>): TransactGetSingleTableRequest<T> {
     return new TransactGetSingleTableRequest(this.dynamoDBWrapper, this.modelClazz, keys)
   }
-
-  /**
-   * TODO v3: check for potential replacement
-   */
-  // makeRequest<Z>(operation: DynamoApiOperations, params?: Record<string, any>): Promise<Z> {
-  //   this.logger.debug('request', params)
-  //   return this.dynamoDBWrapper
-  //     .makeRequest(operation, params)
-  //     .then(promiseTap((r: Z) => this.logger.debug('response', r)))
-  // }
 }

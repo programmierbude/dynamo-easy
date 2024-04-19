@@ -17,11 +17,11 @@ jobs:
   test:
     strategy:
       matrix:
-        # Test with Node.js v16 (maintenance), v18 (LTS) and v19 current
+        # Test with Node.js v18 (maintenance), v20 (LTS) and v21 current
         node:
-          - 16
           - 18
-          - 19
+          - 20
+          - 21
     name: Node.js v${{ matrix.node }}
     runs-on: ubuntu-latest
     steps:

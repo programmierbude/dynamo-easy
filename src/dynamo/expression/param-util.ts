@@ -2,7 +2,6 @@
  * @module expression
  */
 import * as DynamoDB from '@aws-sdk/client-dynamodb'
-import * as DynamoDBv2 from '../../aws-sdk-v2.types'
 import { isEmpty } from '../../helper/is-empty.function'
 import { isString } from '../../helper/is-string.function'
 import { ConditionalParams } from '../operation-params.type'
@@ -27,12 +26,12 @@ export function addExpression(
 ) {
   const nameSafeCondition = resolveAttributeValueNameConflicts(condition, params)
 
-  const expressionAttributeNames = <DynamoDBv2.ExpressionAttributeNameMap>{
+  const expressionAttributeNames = <Record<string, string>>{
     ...params.ExpressionAttributeNames,
     ...nameSafeCondition.attributeNames,
   }
 
-  const expressionAttributeValues = <DynamoDBv2.ExpressionAttributeValueMap>{
+  const expressionAttributeValues = <Record<string, DynamoDB.AttributeValue>>{
     ...params.ExpressionAttributeValues,
     ...nameSafeCondition.attributeValues,
   }

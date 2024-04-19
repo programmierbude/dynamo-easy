@@ -2,7 +2,6 @@
  * @module store-requests
  */
 import * as DynamoDB from '@aws-sdk/client-dynamodb'
-import * as DynamoDBv2 from '../../../aws-sdk-v2.types'
 
 /**
  * copied from aws-sdk/clients/dynamoDb QueryOutput but added generics, because we process the items and map them
@@ -24,7 +23,7 @@ export interface QueryResponse<T> {
   /**
    * The primary key of the item where the operation stopped, inclusive of the previous result set. Use this value to start a new operation, excluding this value in the new request. If LastEvaluatedKey is empty, then the "last page" of results has been processed and there is no more data to be retrieved. If LastEvaluatedKey is not empty, it does not necessarily mean that there is more data in the result set. The only way to know when you have reached the end of the result set is when LastEvaluatedKey is empty.
    */
-  LastEvaluatedKey?: DynamoDBv2.Key
+  LastEvaluatedKey?: Record<string, DynamoDB.AttributeValue>
   /**
    * The capacity units consumed by the Query operation. The data returned includes the total provisioned throughput consumed, along with statistics for the table and any indexes involved in the operation. ConsumedCapacity is only returned if the ReturnConsumedCapacity parameter was specified For more information, see Provisioned Throughput in the Amazon DynamoDB Developer Guide.
    */

@@ -1,7 +1,7 @@
 /**
  * @module decorators
  */
-import { KeyType } from '../../../aws-sdk-v2.types'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { createOptModelLogger } from '../../../logger/logger'
 import { PropertyMetadata } from '../../metadata/property-metadata.model'
 import { initOrUpdateProperty } from '../property/init-or-update-property.function'
@@ -32,7 +32,7 @@ export function PartitionKey(): PropertyDecorator {
         }
       }
 
-      initOrUpdateProperty({ key: { type: KeyType.HASH } }, target, propertyKey)
+      initOrUpdateProperty({ key: { type: DynamoDB.KeyType.HASH } }, target, propertyKey)
     }
   }
 }

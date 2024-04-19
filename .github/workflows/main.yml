@@ -82,7 +82,7 @@ jobs:
       # report coverage only for non PR
       - name: coveralls
         if: ${{ startsWith(github.ref, 'refs/pull/') == false }}
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 

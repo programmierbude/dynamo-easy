@@ -2,7 +2,6 @@
  * @module multi-model-requests/batch-get
  */
 import * as DynamoDB from '@aws-sdk/client-dynamodb'
-import * as DynamoDBv2 from '../../aws-sdk-v2.types'
 import { promiseDelay } from '../../helper/promise-delay.function'
 import { DynamoDbWrapper } from '../dynamo-db-wrapper'
 
@@ -45,7 +44,7 @@ export function batchGetItemsFetchAll(
  * @hidden
  */
 export type BatchGetItemOutputWithUnprocessedKeys = DynamoDB.BatchGetItemOutput & {
-  UnprocessedKeys: DynamoDBv2.BatchGetRequestMap
+  UnprocessedKeys: Record<string, DynamoDB.KeysAndAttributes>
 }
 
 /**

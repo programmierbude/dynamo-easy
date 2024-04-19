@@ -1,7 +1,7 @@
 /**
  * @module decorators
  */
-import { KeyType } from '../../../aws-sdk-v2.types'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { IndexType } from './index-type.enum'
 import { initOrUpdateIndex } from './util'
 
@@ -11,7 +11,7 @@ import { initOrUpdateIndex } from './util'
 export function GSIPartitionKey(indexName: string): PropertyDecorator {
   return (target: any, propertyKey: string | symbol) => {
     if (typeof propertyKey === 'string') {
-      initOrUpdateIndex(IndexType.GSI, { name: indexName, keyType: KeyType.HASH }, target, propertyKey)
+      initOrUpdateIndex(IndexType.GSI, { name: indexName, keyType: DynamoDB.KeyType.HASH }, target, propertyKey)
     }
   }
 }

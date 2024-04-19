@@ -41,7 +41,7 @@ import {
   NestedModelWithCustomMapper,
 } from '../../test/models/model-with-nested-model-with-custom-mapper.model'
 import { NestedComplexModel } from '../../test/models/nested-complex.model'
-import * as DynamoDBv2 from '../aws-sdk-v2.types'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { metadataForModel } from '../decorator/metadata/metadata-for-model.function'
 import { PropertyMetadata } from '../decorator/metadata/property-metadata.model'
 import { createKeyAttributes, createToKeyFn, fromDb, fromDbOne, toDb, toDbOne, toKey } from './mapper'
@@ -713,13 +713,13 @@ describe('Mapper', () => {
       describe('model with non string/number/binary keys', () => {
         it('should accept date as HASH or RANGE key', () => {
           const now = new Date()
-          const toDbVal: DynamoDBv2.AttributeMap = toDb(new ModelWithDateAsHashKey(now), ModelWithDateAsHashKey)
+          const toDbVal: Record<string, DynamoDB.AttributeValue> = toDb(new ModelWithDateAsHashKey(now), ModelWithDateAsHashKey)
           expect(toDbVal.startDate.S).toBeDefined()
           expect(toDbVal.startDate.S).toEqual(now.toISOString())
         })
         it('should accept date as HASH or RANGE key on GSI', () => {
           const now = new Date()
-          const toDbVal: DynamoDBv2.AttributeMap = toDb(
+          const toDbVal: Record<string, DynamoDB.AttributeValue> = toDb(
             new ModelWithDateAsIndexHashKey(0, now),
             ModelWithDateAsIndexHashKey,
           )

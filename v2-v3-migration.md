@@ -13,6 +13,7 @@
 - [ ] Switch to new implementation of pagination, see [official doc](https://github.com/aws/aws-sdk-js-v3#paginators).
 - [ ] Use middleware stack to implement verbose logging of request / response data
 - [ ] Update [dynamo-easy-demo](https://github.com/shiftcode/dynamo-easy-demo) see [this](https://github.com/shiftcode/dynamo-easy-demo/issues/1) issue
+- [ ] Check if we still need to implement our custom retry backoff behaviour, since it seems that v3 has some reasonable default behaviour. (see [https://github.com/aws/aws-sdk-js-v3?tab=readme-ov-file#example-pagination-usage](https://github.com/smithy-lang/smithy-typescript/blob/main/packages/util-retry/README.md#default))
 
 ## Useful Links
 

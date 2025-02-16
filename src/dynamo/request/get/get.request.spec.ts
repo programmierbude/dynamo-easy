@@ -1,5 +1,6 @@
 // tslint:disable:no-unused-expression
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
+import { ReturnConsumedCapacity } from '@aws-sdk/client-dynamodb'
 import { SimpleWithCompositePartitionKeyModel, SimpleWithPartitionKeyModel } from '../../../../test/models'
 import { updateDynamoEasyConfig } from '../../../config/update-config.function'
 import { Attributes } from '../../../mapper/type/attribute.type'
@@ -47,7 +48,7 @@ describe('GetRequest', () => {
     })
 
     it('should set param for ReturnConsumedCapacity', () => {
-      request.returnConsumedCapacity('TOTAL')
+      request.returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)
       expect(request.params.ReturnConsumedCapacity).toBe('TOTAL')
     })
   })
@@ -57,16 +58,18 @@ describe('GetRequest', () => {
     const dbItem: Attributes<SimpleWithPartitionKeyModel> = { age: { N: '20' }, id: { S: 'my-id' } }
     const sampleResponse: DynamoDB.GetItemOutput = { Item: dbItem }
 
-    let getItemSpy: jasmine.Spy
+    let getItemMock: jest.Mock
     let req: GetRequest<SimpleWithPartitionKeyModel>
 
     beforeEach(() => {
-      getItemSpy = jasmine.createSpy().and.returnValue(Promise.resolve(sampleResponse))
-      req = new GetRequest(<any>{ getItem: getItemSpy }, SimpleWithPartitionKeyModel, 'my-id')
+      getItemMock = jest.fn().mockReturnValueOnce(Promise.resolve(sampleResponse))
+      req = new GetRequest(<any>{ getItem: getItemMock }, SimpleWithPartitionKeyModel, 'my-id')
     })
+
     it('exec', async () => {
       expect(await req.exec()).toEqual(jsItem)
     })
+
     it('execFullResponse', async () => {
       expect(await req.execFullResponse()).toEqual({ Item: jsItem })
     })
@@ -74,29 +77,29 @@ describe('GetRequest', () => {
 
   describe('logger', () => {
     const sampleResponse: DynamoDB.GetItemOutput = { Item: undefined }
-    let logReceiverSpy: jasmine.Spy
-    let getItemSpy: jasmine.Spy
+    let logReceiverMock: jest.Mock
+    let getItemMock: jest.Mock
     let req: GetRequest<SimpleWithPartitionKeyModel>
 
     beforeEach(() => {
-      logReceiverSpy = jasmine.createSpy()
-      getItemSpy = jasmine.createSpy().and.returnValue(Promise.resolve(sampleResponse))
-      updateDynamoEasyConfig({ logReceiver: logReceiverSpy })
-      req = new GetRequest(<any>{ getItem: getItemSpy }, SimpleWithPartitionKeyModel, 'partitionKeyValue')
+      logReceiverMock = jest.fn()
+      getItemMock = jest.fn().mockReturnValueOnce(Promise.resolve(sampleResponse))
+      updateDynamoEasyConfig({ logReceiver: logReceiverMock })
+      req = new GetRequest(<any>{ getItem: getItemMock }, SimpleWithPartitionKeyModel, 'partitionKeyValue')
     })
 
     it('exec should log params and response', async () => {
       await req.exec()
-      expect(logReceiverSpy).toHaveBeenCalled()
-      const logInfoData = logReceiverSpy.calls.allArgs().map((i) => i[0].data)
+      expect(logReceiverMock).toHaveBeenCalled()
+      const logInfoData = logReceiverMock.mock.calls.map((i) => i[0].data)
       expect(logInfoData.includes(req.params)).toBeTruthy()
       expect(logInfoData.includes(sampleResponse)).toBeTruthy()
     })
 
     it('execFullResponse should log params and response', async () => {
       await req.execFullResponse()
-      expect(logReceiverSpy).toHaveBeenCalled()
-      const logInfoData = logReceiverSpy.calls.allArgs().map((i) => i[0].data)
+      expect(logReceiverMock).toHaveBeenCalled()
+      const logInfoData = logReceiverMock.mock.calls.map((i) => i[0].data)
       expect(logInfoData.includes(req.params)).toBeTruthy()
       expect(logInfoData.includes(sampleResponse)).toBeTruthy()
     })

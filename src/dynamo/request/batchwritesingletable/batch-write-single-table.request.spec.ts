@@ -1,6 +1,7 @@
 // tslint:disable:no-unnecessary-class
 
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
+import { ReturnConsumedCapacity, ReturnItemCollectionMetrics } from '@aws-sdk/client-dynamodb'
 import { Organization } from '../../../../test/models'
 import { DynamoDbWrapper } from '../../dynamo-db-wrapper'
 import { getTableName } from '../../get-table-name.function'
@@ -42,12 +43,12 @@ describe('batch write single table request', () => {
     })
 
     it('returnConsumedCapacity', () => {
-      request.returnConsumedCapacity('TOTAL')
+      request.returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)
       expect(request.params.ReturnConsumedCapacity).toBe('TOTAL')
     })
 
     it('returnItemCollectionMetrics', () => {
-      request.returnItemCollectionMetrics('SIZE')
+      request.returnItemCollectionMetrics(ReturnItemCollectionMetrics.SIZE)
       expect(request.params.ReturnItemCollectionMetrics).toBe('SIZE')
     })
 
@@ -130,45 +131,49 @@ describe('batch write single table request', () => {
       },
     }
 
-    let generatorSpy: jasmine.Spy
-    let nextFnSpy: jasmine.Spy
-    let batchWriteItemSpy: jasmine.Spy
+    let generatorMock: jest.Mock
+    let nextFnMock: jest.Mock
+    let batchWriteItemMock: jest.Mock
 
     beforeEach(() => {
-      batchWriteItemSpy = jasmine
-        .createSpy()
-        .and.returnValues(Promise.resolve(output), Promise.resolve(output), Promise.resolve({ MyResult: true }))
-      nextFnSpy = jasmine.createSpy().and.returnValue({ value: 0 })
-      dynamoDBWrapper = <DynamoDbWrapper>(<any>{ batchWriteItem: batchWriteItemSpy })
-      generatorSpy = jasmine.createSpy().and.returnValue({ next: nextFnSpy })
+      batchWriteItemMock = jest
+        .fn()
+        .mockReturnValueOnce(Promise.resolve(output))
+        .mockReturnValueOnce(Promise.resolve(output))
+        .mockReturnValueOnce(Promise.resolve({ MyResult: true }))
+      nextFnMock = jest.fn().mockReturnValue({ value: 0 })
+      dynamoDBWrapper = <DynamoDbWrapper>(<any>{ batchWriteItem: batchWriteItemMock })
+      generatorMock = jest.fn().mockReturnValueOnce({ next: nextFnMock })
 
       request = new BatchWriteSingleTableRequest(dynamoDBWrapper, Organization)
     })
 
     it('should retry when unprocessed items are returned', async () => {
       request.put([item])
-      await request.exec(<any>generatorSpy)
+      await request.exec(<any>generatorMock)
 
       // only one instance of the generator should be created
-      expect(generatorSpy).toHaveBeenCalledTimes(1)
+      expect(generatorMock).toHaveBeenCalledTimes(1)
 
-      expect(nextFnSpy).toHaveBeenCalledTimes(2)
+      expect(nextFnMock).toHaveBeenCalledTimes(2)
 
-      expect(batchWriteItemSpy).toHaveBeenCalledTimes(3)
+      expect(batchWriteItemMock).toHaveBeenCalledTimes(3)
     })
 
     it('should keep other params in additional calls', async () => {
       request.put([item])
-      request.returnConsumedCapacity('TOTAL')
-      request.returnItemCollectionMetrics('SIZE')
-      await request.exec(<any>generatorSpy)
+      request.returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)
+      request.returnItemCollectionMetrics(ReturnItemCollectionMetrics.SIZE)
+      await request.exec(<any>generatorMock)
 
-      expect(batchWriteItemSpy).toHaveBeenCalledTimes(3)
-      const paramsThirdCall = <DynamoDB.BatchWriteItemInput>batchWriteItemSpy.calls.all()[2].args[0]
+      expect(batchWriteItemMock).toHaveBeenCalledTimes(3)
+      const paramsThirdCall = <DynamoDB.BatchWriteItemInput>batchWriteItemMock.mock.calls[2][0]
 
-      expect(paramsThirdCall).toBeDefined()
-      expect(paramsThirdCall.ReturnConsumedCapacity).toBe('TOTAL')
-      expect(paramsThirdCall.ReturnItemCollectionMetrics).toBe('SIZE')
+      expect(paramsThirdCall).toMatchObject(
+        expect.objectContaining({ ReturnConsumedCapacity: 'TOTAL', ReturnItemCollectionMetrics: 'SIZE' }),
+      )
+      // expect(paramsThirdCall.ReturnConsumedCapacity).toBe('TOTAL')
+      // expect(paramsThirdCall.ReturnItemCollectionMetrics).toBe('SIZE')
     })
   })
 

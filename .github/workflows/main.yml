@@ -14,23 +14,64 @@ on:
     tags-ignore:
       - '**'
 jobs:
-  build:
+  test:
+    strategy:
+      matrix:
+        # Test with Node.js v18 (maintenance), v20 (LTS) and v21 current
+        node:
+          - 18
+          - 20
+          - 21
+    name: Node.js v${{ matrix.node }}
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2.2.0
-      - name: Install Node v12
-        uses: actions/setup-node@v2-beta
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 12
-      - uses: actions/cache@v2
+          node-version: ${{ matrix.node }}
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+      - uses: actions/cache@v4
+        id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
         with:
-          path: ~/.npm
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      # Print current Node.js version
+      - run: node --version
+      # Print current Yarn version
+      - run: npm --version
+      # Print current Git version
+      - run: git --version
+      # Install node_modules
+      - run: HUSKY=0 npm ci
+      # Run tests
+      - run: npm run test:ci
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Node v18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+      - uses: actions/cache@v4
+        id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
       - name: install
-        run: npm ci
+        run: HUSKY=0 npm ci
       - name: lint, test, and build
         run: |
           npm run lint:ci
@@ -41,7 +82,7 @@ jobs:
       # report coverage only for non PR
       - name: coveralls
         if: ${{ startsWith(github.ref, 'refs/pull/') == false }}
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 

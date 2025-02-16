@@ -5,6 +5,7 @@ import { ModelConstructor } from '../../model/model-constructor'
 import { attribute } from '../expression/logical-operator/attribute.function'
 import { or } from '../expression/logical-operator/public.api'
 import { WriteRequest } from './write.request'
+import { ReturnItemCollectionMetrics } from '@aws-sdk/client-dynamodb'
 
 describe('write request', () => {
   class TestWriteRequest<T> extends WriteRequest<T, T, any, any, TestWriteRequest<T>> {
@@ -16,7 +17,7 @@ describe('write request', () => {
       this.logger = createLogger('dynamo.request.PutRequest', modelClazz)
     }
 
-    protected doRequest(params: any): Promise<any> {
+    protected doRequest(_params: any): Promise<any> {
       return Promise.resolve(null)
     }
   }
@@ -24,17 +25,17 @@ describe('write request', () => {
   let req: TestWriteRequest<SimpleWithPartitionKeyModel>
 
   describe('ReturnValues = NONE', () => {
-    let doRequestSpy: jasmine.Spy
+    let doRequestMock: jest.Mock
     const response = { myValue: true }
     beforeEach(() => {
       req = new TestWriteRequest(SimpleWithPartitionKeyModel)
-      doRequestSpy = jasmine.createSpy().and.returnValue(Promise.resolve(response))
-      Object.assign(req, { doRequest: doRequestSpy })
+      doRequestMock = jest.fn().mockReturnValueOnce(Promise.resolve(response))
+      Object.assign(req, { doRequest: doRequestMock })
     })
 
     it('exec should call execFullResponse', async () => {
       await req.exec()
-      expect(doRequestSpy).toHaveBeenCalled()
+      expect(doRequestMock).toHaveBeenCalled()
     })
 
     it('exec should return void', async () => {
@@ -68,7 +69,7 @@ describe('write request', () => {
     })
 
     it('should set returnItemCollectionMetrics', () => {
-      req.returnItemCollectionMetrics('SIZE')
+      req.returnItemCollectionMetrics(ReturnItemCollectionMetrics.SIZE)
       expect(req.params.ReturnItemCollectionMetrics).toBe('SIZE')
     })
 

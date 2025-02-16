@@ -1,7 +1,7 @@
 /**
  * @module multi-model-requests/transact-get
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { metadataForModel } from '../../decorator/metadata/metadata-for-model.function'
 import { createToKeyFn, fromDb } from '../../mapper/mapper'
 import { Attributes } from '../../mapper/type/attribute.type'
@@ -19,15 +19,17 @@ const MAX_REQUEST_ITEM_COUNT = 10
  * Request class for the TransactGetItems operation. Read up to 10 items from one or more tables in a transaction.
  */
 export class TransactGetRequest {
-  get dynamoDB(): DynamoDB {
+  get dynamoDB(): DynamoDB.DynamoDB {
     return this.dynamoDBWrapper.dynamoDB
   }
 
-  readonly params: DynamoDB.TransactGetItemsInput
+  readonly params: DynamoDB.TransactGetItemsInput & {
+    TransactItems: NonNullable<DynamoDB.TransactGetItemsInput['TransactItems']>
+  }
   private readonly dynamoDBWrapper: DynamoDbWrapper
   private readonly tables: Array<ModelConstructor<any>> = []
 
-  constructor(dynamoDB?: DynamoDB) {
+  constructor(dynamoDB: DynamoDB.DynamoDB) {
     this.dynamoDBWrapper = new DynamoDbWrapper(dynamoDB)
     this.params = {
       TransactItems: [],

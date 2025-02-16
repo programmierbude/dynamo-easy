@@ -1,7 +1,7 @@
 /**
  * @module store-requests
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { randomExponentialBackoffTimer } from '../../../helper/random-exponential-backoff-timer.generator'
 import { createLogger, Logger } from '../../../logger/logger'
 import { createToKeyFn, toDb } from '../../../mapper/mapper'
@@ -17,7 +17,7 @@ import { BaseRequest } from '../base.request'
 export class BatchWriteSingleTableRequest<T, T2 = T> extends BaseRequest<
   T,
   T2,
-  DynamoDB.BatchWriteItemInput,
+  DynamoDB.BatchWriteItemInput & { RequestItems: NonNullable<DynamoDB.BatchWriteItemInput['RequestItems']> },
   BatchWriteSingleTableRequest<T, T2>
 > {
   private readonly logger: Logger

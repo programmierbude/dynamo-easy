@@ -1,6 +1,5 @@
 // tslint:disable:no-non-null-assertion
 // tslint:disable:no-string-literal
-import * as DynamoDb from 'aws-sdk/clients/dynamodb'
 import {
   organization1CreatedAt,
   organization1Employee1CreatedAt,
@@ -14,13 +13,15 @@ import {
   Employee,
   Gift,
   Id,
-  ModelWithDefaultValue,
+  ModelWithCustomMapperAndDefaultValue,
   ModelWithCustomMapperModel,
   ModelWithDateAsHashKey,
   ModelWithDateAsIndexHashKey,
+  ModelWithDefaultValue,
   ModelWithNonDecoratedEnum,
   ModelWithoutCustomMapper,
   ModelWithoutCustomMapperOnIndex,
+  MyProp,
   Organization,
   OrganizationEvent,
   Product,
@@ -32,8 +33,6 @@ import {
   SimpleWithRenamedPartitionKeyModel,
   StringType,
   Type,
-  ModelWithCustomMapperAndDefaultValue,
-  MyProp,
 } from '../../test/models'
 import { IdMapper } from '../../test/models/model-with-custom-mapper.model'
 import { ModelWithEmptyValues } from '../../test/models/model-with-empty-values'
@@ -42,6 +41,7 @@ import {
   NestedModelWithCustomMapper,
 } from '../../test/models/model-with-nested-model-with-custom-mapper.model'
 import { NestedComplexModel } from '../../test/models/nested-complex.model'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { metadataForModel } from '../decorator/metadata/metadata-for-model.function'
 import { PropertyMetadata } from '../decorator/metadata/property-metadata.model'
 import { createKeyAttributes, createToKeyFn, fromDb, fromDbOne, toDb, toDbOne, toKey } from './mapper'
@@ -179,7 +179,7 @@ describe('Mapper', () => {
         const employee1 = <MapAttribute<Employee>>attrValue.L[0]
         expect(employee1).toBeDefined()
         expect(keyOf(employee1)).toBe('M')
-        expect(Object.keys(employee1.M).length).toBe(2)
+        expect(Object.keys(employee1.M).length).toBe(3)
         expect(employee1.M.name).toBeDefined()
         expect(keyOf(employee1.M.name)).toBe('S')
         expect((<StringAttribute>employee1.M.name).S).toBe('max')
@@ -187,6 +187,10 @@ describe('Mapper', () => {
         expect(employee1.M.age).toBeDefined()
         expect(keyOf(employee1.M.age)).toBe('N')
         expect((<NumberAttribute>employee1.M.age).N).toBe('25')
+
+        expect(employee1.M.age).toBeDefined()
+        expect(keyOf(employee1.M.sortedSet)).toBe('NULL')
+        expect((<NullAttribute>employee1.M.sortedSet).NULL).toBe(true)
       })
 
       it('heterogenous Set without decorator should throw', () => {
@@ -469,9 +473,9 @@ describe('Mapper', () => {
 
           organization.awards = new Set(['good, better, shiftcode', 'just kiddin'])
 
-          const events = new Set()
+          const events = new Set<OrganizationEvent>()
           events.add(new OrganizationEvent('shift the web', 1520))
-          organization.events = events
+          ;(organization as any).events = events
           organization.transient = 'the value which is marked as transient'
 
           organizationAttrMap = toDb(organization, Organization)
@@ -552,16 +556,16 @@ describe('Mapper', () => {
             expect((<StringAttribute>employee1.createdAt).S).toBe(createdAtDateEmployee1.toISOString())
 
             // test employee2
-            const employee2: DynamoDb.MapAttributeValue = (<MapAttribute>employeesL[1]).M
+            const employee2: Attributes<any> = (<MapAttribute>employeesL[1]).M
             expect(employee2['name']).toBeDefined()
-            expect(employee2['name'].S).toBeDefined()
-            expect(employee2['name'].S).toBe('anna')
+            expect((employee2['name'] as StringAttribute).S).toBeDefined()
+            expect((employee2['name'] as StringAttribute).S).toBe('anna')
             expect(employee2['age']).toBeDefined()
-            expect(employee2['age'].N).toBeDefined()
-            expect(employee2['age'].N).toBe('27')
+            expect((employee2['age'] as NumberAttribute).N).toBeDefined()
+            expect((employee2['age'] as NumberAttribute).N).toBe('27')
             expect(employee2['createdAt']).toBeDefined()
-            expect(employee2['createdAt'].S).toBeDefined()
-            expect(employee2['createdAt'].S).toBe(createdAtDateEmployee2.toISOString())
+            expect((employee2['createdAt'] as StringAttribute).S).toBeDefined()
+            expect((employee2['createdAt'] as StringAttribute).S).toBe(createdAtDateEmployee2.toISOString())
           })
 
           it('cities', () => {
@@ -713,13 +717,16 @@ describe('Mapper', () => {
       describe('model with non string/number/binary keys', () => {
         it('should accept date as HASH or RANGE key', () => {
           const now = new Date()
-          const toDbVal: DynamoDb.AttributeMap = toDb(new ModelWithDateAsHashKey(now), ModelWithDateAsHashKey)
+          const toDbVal: Record<string, DynamoDB.AttributeValue> = toDb(
+            new ModelWithDateAsHashKey(now),
+            ModelWithDateAsHashKey,
+          )
           expect(toDbVal.startDate.S).toBeDefined()
           expect(toDbVal.startDate.S).toEqual(now.toISOString())
         })
         it('should accept date as HASH or RANGE key on GSI', () => {
           const now = new Date()
-          const toDbVal: DynamoDb.AttributeMap = toDb(
+          const toDbVal: Record<string, DynamoDB.AttributeValue> = toDb(
             new ModelWithDateAsIndexHashKey(0, now),
             ModelWithDateAsIndexHashKey,
           )
@@ -1045,20 +1052,20 @@ describe('Mapper', () => {
     })
 
     it('should throw when given partial has undefined key properties', () => {
-      expect(() => toKey({}, SimpleWithPartitionKeyModel)).toThrow()
-      expect(() => toKey({ id: 'myId' }, SimpleWithCompositePartitionKeyModel)).toThrow()
-      expect(() => toKey({ creationDate: new Date() }, SimpleWithCompositePartitionKeyModel)).toThrow()
+      expect(() => toKey(<any>{}, SimpleWithPartitionKeyModel)).toThrow()
+      expect(() => toKey(<any>{ id: 'myId' }, SimpleWithCompositePartitionKeyModel)).toThrow()
+      expect(() => toKey(<any>{ creationDate: new Date() }, SimpleWithCompositePartitionKeyModel)).toThrow()
     })
 
     it('should create key attributes of simple key', () => {
-      const key = toKey({ id: 'myId' }, SimpleWithPartitionKeyModel)
+      const key = toKey(<any>{ id: 'myId' }, SimpleWithPartitionKeyModel)
       expect(key).toEqual({
         id: { S: 'myId' },
       })
     })
 
     it('should create key attributes of simple key (custom db name)', () => {
-      const key = toKey({ id: 'myId' }, SimpleWithRenamedPartitionKeyModel)
+      const key = toKey(<any>{ id: 'myId' }, SimpleWithRenamedPartitionKeyModel)
       expect(key).toEqual({
         custom_id: { S: 'myId' },
       })

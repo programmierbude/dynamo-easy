@@ -1,4 +1,4 @@
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { ComplexModel, Organization } from '../../../test/models'
 import { Metadata } from '../../decorator/metadata/metadata'
 import { metadataForModel } from '../../decorator/metadata/metadata-for-model.function'
@@ -12,7 +12,7 @@ import {
 } from './request-expression-builder'
 
 const DYNAMO_RX_MOCK: DynamoDbWrapper = <DynamoDbWrapper>{
-  query(params: DynamoDB.QueryInput): Promise<DynamoDB.QueryOutput> {
+  query(_params: DynamoDB.QueryInput): Promise<DynamoDB.QueryOutput> {
     return Promise.resolve({})
   },
 }

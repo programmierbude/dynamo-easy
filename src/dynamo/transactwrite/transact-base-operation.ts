@@ -1,7 +1,7 @@
 /**
  * @module multi-model-requests/transact-write
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { Metadata } from '../../decorator/metadata/metadata'
 import { metadataForModel } from '../../decorator/metadata/metadata-for-model.function'
 import { ModelConstructor } from '../../model/model-constructor'
@@ -19,11 +19,13 @@ import { ConditionalParamsHost } from '../operation-params.type'
 /**
  * Abstract base class for all transact items.
  */
+// TODO typings check on unused generic
 export abstract class TransactBaseOperation<
   T,
   I extends DynamoDB.ConditionCheck | DynamoDB.Put | DynamoDB.Update | DynamoDB.Delete,
-  R extends TransactBaseOperation<T, I, any>
-> implements ConditionalParamsHost {
+  _R extends TransactBaseOperation<T, I, any>,
+> implements ConditionalParamsHost
+{
   readonly params: I
   readonly metadata: Metadata<T>
   readonly modelClazz: ModelConstructor<T>

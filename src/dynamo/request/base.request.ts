@@ -1,7 +1,7 @@
 /**
  * @module store-requests
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { Metadata } from '../../decorator/metadata/metadata'
 import { metadataForModel } from '../../decorator/metadata/metadata-for-model.function'
 import { ModelConstructor } from '../../model/model-constructor'
@@ -27,7 +27,7 @@ export abstract class BaseRequest<
     | DynamoDB.BatchWriteItemInput
     | DynamoDB.TransactGetItemsInput
     | DynamoDB.TransactWriteItemsInput,
-  R extends BaseRequest<T, T2, I, any>
+  R extends BaseRequest<T, T2, I, any>,
 > {
   readonly dynamoDBWrapper: DynamoDbWrapper
 

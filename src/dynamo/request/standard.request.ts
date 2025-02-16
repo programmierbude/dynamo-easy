@@ -1,7 +1,7 @@
 /**
  * @module store-requests
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { ModelConstructor } from '../../model/model-constructor'
 import { DynamoDbWrapper } from '../dynamo-db-wrapper'
 import { getTableName } from '../get-table-name.function'
@@ -21,7 +21,7 @@ export abstract class StandardRequest<
     | DynamoDB.UpdateItemInput
     | DynamoDB.QueryInput
     | DynamoDB.ScanInput,
-  R extends StandardRequest<T, T2, I, any>
+  R extends StandardRequest<T, T2, I, any>,
 > extends BaseRequest<T, T2, I, R> {
   protected constructor(dynamoDBWrapper: DynamoDbWrapper, modelClazz: ModelConstructor<T>) {
     super(dynamoDBWrapper, modelClazz)

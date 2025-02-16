@@ -10,6 +10,6 @@ import { ConditionOperator } from '../type/condition-operator.type'
  */
 export function aliasForOperator(operator: ConditionOperator): OperatorAlias {
   return Array.isArray(OPERATOR_TO_ALIAS_MAP[operator])
-    ? <OperatorAlias>OPERATOR_TO_ALIAS_MAP[operator][0]
-    : <OperatorAlias>OPERATOR_TO_ALIAS_MAP[operator]
+    ? OPERATOR_TO_ALIAS_MAP[operator][0]
+    : OPERATOR_TO_ALIAS_MAP[operator]
 }

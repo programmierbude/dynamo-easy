@@ -1,7 +1,7 @@
 /**
  * @module dynamo-easy
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 
 /**
  * @hidden
@@ -14,8 +14,8 @@ export interface ConditionalParamsHost {
  * @hidden
  */
 export interface ConditionalParams {
-  expressionAttributeNames?: DynamoDB.ExpressionAttributeNameMap
-  expressionAttributeValues?: DynamoDB.ExpressionAttributeValueMap
+  expressionAttributeNames?: Record<string, string>
+  expressionAttributeValues?: Record<string, DynamoDB.AttributeValue>
   [key: string]: any
 }
 

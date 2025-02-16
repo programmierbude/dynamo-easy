@@ -1,5 +1,6 @@
 // tslint:disable:no-non-null-assertion
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
+import { ReturnConsumedCapacity } from '@aws-sdk/client-dynamodb'
 import { Organization, SimpleWithCompositePartitionKeyModel, SimpleWithPartitionKeyModel } from '../../../test/models'
 import { toDb } from '../../mapper/mapper'
 import { Attributes } from '../../mapper/type/attribute.type'
@@ -12,17 +13,17 @@ describe('batch get', () => {
 
   describe('constructor', () => {
     it('use provided DynamoDB instance', () => {
-      const dynamoDB = new DynamoDB()
+      const dynamoDB = new DynamoDB.DynamoDB({})
       const batchGetRequest = new BatchGetRequest(dynamoDB)
       expect(batchGetRequest.dynamoDB).toBe(dynamoDB)
 
-      const batchGetRequest2 = new BatchGetRequest()
+      const batchGetRequest2 = new BatchGetRequest(new DynamoDB.DynamoDB({}))
       expect(batchGetRequest2.dynamoDB).not.toBe(dynamoDB)
     })
   })
 
   describe('params', () => {
-    beforeEach(() => (request = new BatchGetRequest()))
+    beforeEach(() => (request = new BatchGetRequest(new DynamoDB.DynamoDB({}))))
 
     it('base params', () => {
       const params = request.params
@@ -48,13 +49,13 @@ describe('batch get', () => {
     })
 
     it('returnConsumedCapacity', () => {
-      request.returnConsumedCapacity('TOTAL')
+      request.returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)
       expect(request.params.ReturnConsumedCapacity).toBe('TOTAL')
     })
   })
 
   describe('forModel', () => {
-    beforeEach(() => (request = new BatchGetRequest()))
+    beforeEach(() => (request = new BatchGetRequest(new DynamoDB.DynamoDB({}))))
 
     it('should throw when same table is used 2 times', () => {
       request.forModel(SimpleWithPartitionKeyModel, [{ id: 'idVal' }])
@@ -87,8 +88,10 @@ describe('batch get', () => {
     })
 
     it('should throw when more than 100 items are added', () => {
-      const items55: Array<Partial<SimpleWithPartitionKeyModel>> = [...new Array(55)].map((x, i) => ({ id: `id-${i}` }))
-      const items60: Array<Partial<Organization>> = [...new Array(60)].map((x, i) => ({
+      const items55: Array<Partial<SimpleWithPartitionKeyModel>> = [...new Array(55)].map((_x, i) => ({
+        id: `id-${i}`,
+      }))
+      const items60: Array<Partial<Organization>> = [...new Array(60)].map((_x, i) => ({
         id: `id-${i}`,
         createdAtDate: new Date(),
       }))
@@ -124,17 +127,20 @@ describe('batch get', () => {
       },
     }
 
-    let batchGetItemsSpy: jasmine.Spy
+    let batchGetItemsMock: jest.Mock
     let nextSpyFn: () => { value: number }
 
     const generatorMock = () => <any>{ next: nextSpyFn }
 
     beforeEach(() => {
-      request = new BatchGetRequest()
+      request = new BatchGetRequest(new DynamoDB.DynamoDB({}))
       request.forModel(SimpleWithPartitionKeyModel, [jsItem1, jsItem2])
 
-      batchGetItemsSpy = jasmine.createSpy().and.returnValues(Promise.resolve(output1), Promise.resolve(output2))
-      const dynamoDBWrapper: DynamoDbWrapper = <any>{ batchGetItems: batchGetItemsSpy }
+      batchGetItemsMock = jest
+        .fn()
+        .mockReturnValueOnce(Promise.resolve(output1))
+        .mockReturnValueOnce(Promise.resolve(output2))
+      const dynamoDBWrapper: DynamoDbWrapper = <any>{ batchGetItems: batchGetItemsMock }
 
       Object.assign(request, { dynamoDBWrapper })
 
@@ -144,7 +150,7 @@ describe('batch get', () => {
     it('[execNoMap] should backoff and retry when UnprocessedItems are returned', async () => {
       const result = await request.execNoMap(generatorMock)
       expect(nextSpyFn).toHaveBeenCalledTimes(1)
-      expect(batchGetItemsSpy).toHaveBeenCalledTimes(2)
+      expect(batchGetItemsMock).toHaveBeenCalledTimes(2)
       expect(result).toBeDefined()
       expect(result.Responses).toBeDefined()
 
@@ -158,7 +164,7 @@ describe('batch get', () => {
     it('[execFullResponse] should backoff and retry when UnprocessedItems are returned', async () => {
       const result = await request.execFullResponse(generatorMock)
       expect(nextSpyFn).toHaveBeenCalledTimes(1)
-      expect(batchGetItemsSpy).toHaveBeenCalledTimes(2)
+      expect(batchGetItemsMock).toHaveBeenCalledTimes(2)
       expect(result).toBeDefined()
       expect(result.Responses).toBeDefined()
 
@@ -172,7 +178,7 @@ describe('batch get', () => {
     it('[exec] should backoff and retry when UnprocessedItems are returned', async () => {
       const result = await request.exec(generatorMock)
       expect(nextSpyFn).toHaveBeenCalledTimes(1)
-      expect(batchGetItemsSpy).toHaveBeenCalledTimes(2)
+      expect(batchGetItemsMock).toHaveBeenCalledTimes(2)
       expect(result).toBeDefined()
 
       const resultItems = result[getTableName(SimpleWithPartitionKeyModel)]
@@ -184,7 +190,7 @@ describe('batch get', () => {
   })
 
   describe('should map the result items', () => {
-    let batchGetItemsSpy: jasmine.Spy
+    let batchGetItemsMock: jest.Mock
     const jsItem: SimpleWithPartitionKeyModel = { id: 'idVal', age: 20 }
     const dbItem: Attributes<SimpleWithPartitionKeyModel> = {
       id: { S: 'idVal' },
@@ -198,22 +204,22 @@ describe('batch get', () => {
     }
 
     beforeEach(() => {
-      batchGetItemsSpy = jasmine.createSpy().and.returnValue(Promise.resolve(sampleResponse))
-      const dynamoDBWrapper: DynamoDbWrapper = <any>{ batchGetItems: batchGetItemsSpy }
-      request = new BatchGetRequest()
+      batchGetItemsMock = jest.fn().mockReturnValueOnce(Promise.resolve(sampleResponse))
+      const dynamoDBWrapper: DynamoDbWrapper = <any>{ batchGetItems: batchGetItemsMock }
+      request = new BatchGetRequest(new DynamoDB.DynamoDB({}))
       Object.assign(request, { dynamoDBWrapper })
       request.forModel(SimpleWithPartitionKeyModel, [{ id: 'idVal' }])
     })
 
     it('exec', async () => {
       const result = await request.exec()
-      expect(batchGetItemsSpy).toHaveBeenCalled()
+      expect(batchGetItemsMock).toHaveBeenCalled()
       expect(result).toEqual({ [getTableName(SimpleWithPartitionKeyModel)]: [jsItem] })
     })
 
     it('execFullResponse', async () => {
       const result = await request.execFullResponse()
-      expect(batchGetItemsSpy).toHaveBeenCalled()
+      expect(batchGetItemsMock).toHaveBeenCalled()
       expect(result).toEqual({
         Responses: { [getTableName(SimpleWithPartitionKeyModel)]: [jsItem] },
         UnprocessedKeys: {},

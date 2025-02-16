@@ -1,11 +1,9 @@
 /**
  * @module dynamo-easy
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
-import { promiseTap } from '../helper/promise-tap.function'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { createLogger, Logger } from '../logger/logger'
 import { ModelConstructor } from '../model/model-constructor'
-import { DynamoApiOperations } from './dynamo-api-operations.type'
 import { DynamoDbWrapper } from './dynamo-db-wrapper'
 import { getTableName } from './get-table-name.function'
 import { BatchGetSingleTableRequest } from './request/batchgetsingletable/batch-get-single-table.request'
@@ -22,7 +20,7 @@ import { UpdateRequest } from './request/update/update.request'
  * DynamoStore
  */
 export class DynamoStore<T> {
-  get dynamoDB(): DynamoDB {
+  get dynamoDB(): DynamoDB.DynamoDB {
     return this.dynamoDBWrapper.dynamoDB
   }
 
@@ -30,7 +28,7 @@ export class DynamoStore<T> {
   private readonly logger: Logger
   private readonly dynamoDBWrapper: DynamoDbWrapper
 
-  constructor(private modelClazz: ModelConstructor<T>, dynamoDB?: DynamoDB) {
+  constructor(private modelClazz: ModelConstructor<T>, dynamoDB: DynamoDB.DynamoDB) {
     this.logger = createLogger('dynamo.DynamoStore', modelClazz)
     this.dynamoDBWrapper = new DynamoDbWrapper(dynamoDB)
     this.tableName = getTableName(modelClazz)
@@ -81,12 +79,5 @@ export class DynamoStore<T> {
 
   transactGet(keys: Array<Partial<T>>): TransactGetSingleTableRequest<T> {
     return new TransactGetSingleTableRequest(this.dynamoDBWrapper, this.modelClazz, keys)
-  }
-
-  makeRequest<Z>(operation: DynamoApiOperations, params?: Record<string, any>): Promise<Z> {
-    this.logger.debug('request', params)
-    return this.dynamoDBWrapper
-      .makeRequest(operation, params)
-      .then(promiseTap((r: Z) => this.logger.debug('response', r)))
   }
 }

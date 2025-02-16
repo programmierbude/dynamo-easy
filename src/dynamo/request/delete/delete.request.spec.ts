@@ -1,4 +1,4 @@
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { ComplexModel, SimpleWithPartitionKeyModel } from '../../../../test/models'
 import { updateDynamoEasyConfig } from '../../../config/update-config.function'
 import { DynamoDbWrapper } from '../../dynamo-db-wrapper'
@@ -12,9 +12,9 @@ describe('delete request', () => {
       expect(request.params).toBeDefined()
       const key = request.params.Key
       expect(key).toBeDefined()
-      expect(Object.keys(key).length).toBe(1)
-      expect(key.id).toBeDefined()
-      expect(key.id).toEqual({ S: 'myId' })
+      expect(Object.keys(key ?? {}).length).toBe(1)
+      expect(key?.id).toBeDefined()
+      expect(key?.id).toEqual({ S: 'myId' })
     })
 
     it('composite key', () => {
@@ -24,13 +24,13 @@ describe('delete request', () => {
       expect(request.params).toBeDefined()
       const key = request.params.Key
       expect(key).toBeDefined()
-      expect(Object.keys(key).length).toBe(2)
+      expect(Object.keys(key ?? {}).length).toBe(2)
 
-      expect(key.id).toBeDefined()
-      expect(key.id).toEqual({ S: 'myId' })
+      expect(key?.id).toBeDefined()
+      expect(key?.id).toEqual({ S: 'myId' })
 
-      expect(key.creationDate).toBeDefined()
-      expect(key.creationDate).toEqual({ S: now.toISOString() })
+      expect(key?.creationDate).toBeDefined()
+      expect(key?.creationDate).toEqual({ S: now.toISOString() })
     })
 
     it('should throw for no sort key value', () => {
@@ -46,29 +46,29 @@ describe('delete request', () => {
 
   describe('logger', () => {
     const sampleResponse: DynamoDB.DeleteItemOutput = { Attributes: undefined }
-    let logReceiver: jasmine.Spy
-    let deleteItemSpy: jasmine.Spy
+    let logReceiverMock: jest.Mock
+    let deleteItemMock: jest.Mock
     let req: DeleteRequest<SimpleWithPartitionKeyModel>
 
     beforeEach(() => {
-      logReceiver = jasmine.createSpy()
-      deleteItemSpy = jasmine.createSpy().and.returnValue(Promise.resolve(sampleResponse))
-      updateDynamoEasyConfig({ logReceiver })
-      req = new DeleteRequest(<any>{ deleteItem: deleteItemSpy }, SimpleWithPartitionKeyModel, 'id')
+      logReceiverMock = jest.fn()
+      deleteItemMock = jest.fn().mockReturnValueOnce(Promise.resolve(sampleResponse))
+      updateDynamoEasyConfig({ logReceiver: logReceiverMock })
+      req = new DeleteRequest(<any>{ deleteItem: deleteItemMock }, SimpleWithPartitionKeyModel, 'id')
     })
 
     it('exec should log params and response', async () => {
       await req.exec()
-      expect(logReceiver).toHaveBeenCalled()
-      const logInfoData = logReceiver.calls.allArgs().map((i) => i[0].data)
+      expect(logReceiverMock).toHaveBeenCalled()
+      const logInfoData = logReceiverMock.mock.calls.map((i) => i[0].data)
       expect(logInfoData.includes(req.params)).toBeTruthy()
       expect(logInfoData.includes(sampleResponse)).toBeTruthy()
     })
 
     it('execFullResponse should log params and response', async () => {
       await req.execFullResponse()
-      expect(logReceiver).toHaveBeenCalled()
-      const logInfoData = logReceiver.calls.allArgs().map((i) => i[0].data)
+      expect(logReceiverMock).toHaveBeenCalled()
+      const logInfoData = logReceiverMock.mock.calls.map((i) => i[0].data)
       expect(logInfoData.includes(req.params)).toBeTruthy()
       expect(logInfoData.includes(sampleResponse)).toBeTruthy()
     })

@@ -1,7 +1,7 @@
 /**
  * @module store-requests
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { createLogger, Logger } from '../../../logger/logger'
 import { createKeyAttributes } from '../../../mapper/mapper'
 import { ModelConstructor } from '../../../model/model-constructor'
@@ -15,7 +15,7 @@ import { WriteRequest } from '../write.request'
 /**
  * Request class for the UpdateItem operation.
  */
-export class UpdateRequest<T, T2 = void> extends WriteRequest<
+export class UpdateRequest<T, T2 extends T | Partial<T> | void = void> extends WriteRequest<
   T,
   T2,
   DynamoDB.UpdateItemInput,
@@ -58,6 +58,6 @@ export class UpdateRequest<T, T2 = void> extends WriteRequest<
   }
 
   protected doRequest(params: DynamoDB.UpdateItemInput): Promise<DynamoDB.UpdateItemOutput> {
-    return this.dynamoDBWrapper.updateItem(this.params)
+    return this.dynamoDBWrapper.updateItem(params)
   }
 }

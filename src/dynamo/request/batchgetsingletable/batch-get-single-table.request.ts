@@ -1,7 +1,7 @@
 /**
  * @module store-requests
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { promiseTap } from '../../../helper/promise-tap.function'
 import { randomExponentialBackoffTimer } from '../../../helper/random-exponential-backoff-timer.generator'
 import { createLogger, Logger } from '../../../logger/logger'
@@ -18,10 +18,10 @@ import { BatchGetSingleTableResponse } from './batch-get-single-table.response'
 /**
  * Request class for BatchGetItem operation which supports a single model class only.
  */
-export class BatchGetSingleTableRequest<T, T2 = T> extends BaseRequest<
+export class BatchGetSingleTableRequest<T, T2 extends Partial<T> = T> extends BaseRequest<
   T,
   T2,
-  DynamoDB.BatchGetItemInput,
+  DynamoDB.BatchGetItemInput & { RequestItems: NonNullable<DynamoDB.BatchGetItemInput['RequestItems']> },
   BatchGetSingleTableRequest<T, T2>
 > {
   private readonly logger: Logger

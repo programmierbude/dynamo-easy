@@ -1,5 +1,5 @@
 // tslint:disable:no-non-null-assertion
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { SimpleWithPartitionKeyModel } from '../../../../test/models'
 import { metadataForModel } from '../../../decorator/metadata/metadata-for-model.function'
 import { createKeyAttributes } from '../../../mapper/mapper'
@@ -17,10 +17,10 @@ describe('TransactGetSingleTableRequest', () => {
       req = new TransactGetSingleTableRequest(<any>null, SimpleWithPartitionKeyModel, [{ id: 'myId' }])
 
       expect(req.params.TransactItems).toBeDefined()
-      expect(req.params.TransactItems.length).toBe(1)
-      expect(req.params.TransactItems[0].Get).toBeDefined()
-      expect(req.params.TransactItems[0].Get.TableName).toEqual(getTableName(SimpleWithPartitionKeyModel))
-      expect(req.params.TransactItems[0].Get.Key).toEqual(createKeyAttributes(simpleWithPartitionKeyMeta, 'myId'))
+      expect(req.params.TransactItems?.length).toBe(1)
+      expect(req.params.TransactItems?.[0]?.Get).toBeDefined()
+      expect(req.params.TransactItems?.[0].Get?.TableName).toEqual(getTableName(SimpleWithPartitionKeyModel))
+      expect(req.params.TransactItems?.[0].Get?.Key).toEqual(createKeyAttributes(simpleWithPartitionKeyMeta, 'myId'))
     })
   })
 
@@ -33,7 +33,7 @@ describe('TransactGetSingleTableRequest', () => {
       ],
       ConsumedCapacity: [],
     }
-    const transactGetItemsSpy = jasmine.createSpy().and.returnValue(Promise.resolve(response))
+    const transactGetItemsSpy = jest.fn().mockReturnValue(Promise.resolve(response))
 
     beforeEach(() => {
       const dynamoDBWrapperMock: DynamoDbWrapper = <any>{ transactGetItems: transactGetItemsSpy }
@@ -69,17 +69,21 @@ describe('TransactGetSingleTableRequest', () => {
 
   describe('with empty response', () => {
     const response: DynamoDB.TransactGetItemsOutput = {}
-    const transactGetItemsSpy = jasmine.createSpy().and.returnValue(Promise.resolve(response))
+    const transactGetItemsSpy = jest.fn().mockReturnValue(Promise.resolve(response))
+
     beforeEach(() => {
       const dynamoDBWrapperMock: DynamoDbWrapper = <any>{ transactGetItems: transactGetItemsSpy }
       req = new TransactGetSingleTableRequest(dynamoDBWrapperMock, SimpleWithPartitionKeyModel, [])
     })
+
     it('exec returns empty array', async () => {
       expect(await req.exec()).toEqual([])
     })
+
     it('execNoMap returns original response (empty object)', async () => {
       expect(await req.execNoMap()).toEqual({})
     })
+
     it('execFullResponse returns the response with empty items array', async () => {
       expect(await req.execFullResponse()).toEqual({
         ConsumedCapacity: undefined,

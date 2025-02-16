@@ -1,7 +1,7 @@
 /**
  * @module multi-model-requests/batch-write
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { promiseDelay } from '../../helper/promise-delay.function'
 import { DynamoDbWrapper } from '../dynamo-db-wrapper'
 
@@ -44,7 +44,7 @@ export function batchWriteItemsWriteAll(
  * @hidden
  */
 export type BatchWriteItemOutputWithUnprocessedItems = DynamoDB.BatchWriteItemOutput & {
-  UnprocessedItems: DynamoDB.BatchWriteItemRequestMap
+  UnprocessedItems: Record<string, DynamoDB.WriteRequest[]>
 }
 
 /**

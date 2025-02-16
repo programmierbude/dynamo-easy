@@ -1,7 +1,7 @@
 /**
  * @module store-requests
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { SecondaryIndex } from '../../decorator/impl/index/secondary-index'
 import { fetchAll } from '../../helper/fetch-all.function'
 import { promiseTap } from '../../helper/promise-tap.function'
@@ -35,7 +35,7 @@ export abstract class ReadManyRequest<
   O extends DynamoDB.QueryOutput | DynamoDB.ScanOutput,
   Z extends QueryResponse<T2> | ScanResponse<T2>,
   R extends QueryRequest<T, T2> | ScanRequest<T, T2>,
-  R2 extends QueryRequest<T, Partial<T>> | ScanRequest<T, Partial<T>>
+  R2 extends QueryRequest<T, Partial<T>> | ScanRequest<T, Partial<T>>,
 > extends StandardRequest<T, T2, I, ReadManyRequest<T, T2, I, O, Z, R, R2>> {
   /** Infinite limit will remove the Limit param from request params when calling ReadManyRequest.limit(ReadManyRequest.INFINITE_LIMIT) */
   static INFINITE_LIMIT = -1
@@ -58,7 +58,7 @@ export abstract class ReadManyRequest<
    * @param key A map representing the start id which is included in next call, if null is delivered
    * startKey will be removed from params
    */
-  exclusiveStartKey(key: DynamoDB.Key | null): this {
+  exclusiveStartKey(key: Record<string, DynamoDB.AttributeValue> | null): this {
     // TODO ENHANCEMENT exclusiveStartKey(item: Partial<T>)
     if (key) {
       this.params.ExclusiveStartKey = key

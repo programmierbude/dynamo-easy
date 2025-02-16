@@ -1,7 +1,7 @@
 /**
  * @module store-requests
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { promiseTap } from '../../helper/promise-tap.function'
 import { Logger } from '../../logger/logger'
 import { fromDb } from '../../mapper/mapper'
@@ -19,7 +19,8 @@ import {
 import { ConditionExpressionDefinitionFunction } from '../expression/type/condition-expression-definition-function'
 import { StandardRequest } from './standard.request'
 
-type WriteResponse<O extends DynamoDB.DeleteItemOutput | DynamoDB.PutItemOutput | DynamoDB.UpdateItemOutput, T> = Omit<
+// TODO typings check on unused generic
+type WriteResponse<O extends DynamoDB.DeleteItemOutput | DynamoDB.PutItemOutput | DynamoDB.UpdateItemOutput, _T> = Omit<
   O,
   'Attributes'
 >
@@ -32,7 +33,7 @@ export abstract class WriteRequest<
   T2,
   I extends DynamoDB.DeleteItemInput | DynamoDB.PutItemInput | DynamoDB.UpdateItemInput,
   O extends DynamoDB.DeleteItemOutput | DynamoDB.PutItemOutput | DynamoDB.UpdateItemOutput,
-  R extends WriteRequest<T, T2, I, O, R>
+  R extends WriteRequest<T, T2, I, O, R>,
 > extends StandardRequest<T, T2, I, R> {
   protected abstract readonly logger: Logger
 

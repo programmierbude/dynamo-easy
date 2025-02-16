@@ -1,5 +1,6 @@
 // tslint:disable:no-non-null-assertion
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
+import { ReturnConsumedCapacity, ReturnItemCollectionMetrics } from '@aws-sdk/client-dynamodb'
 import { SimpleWithPartitionKeyModel } from '../../../test/models'
 import { attribute } from '../expression/logical-operator/attribute.function'
 import { update } from '../expression/logical-operator/update.function'
@@ -15,7 +16,7 @@ describe('TransactWriteRequest', () => {
   describe('constructor', () => {
     let req: TransactWriteRequest
     beforeEach(() => {
-      req = new TransactWriteRequest()
+      req = new TransactWriteRequest(new DynamoDB.DynamoDB({}))
     })
 
     it('should add transactItems array to params', () => {
@@ -25,11 +26,11 @@ describe('TransactWriteRequest', () => {
     })
 
     it('use provided DynamoDB instance', () => {
-      const dynamoDB = new DynamoDB()
+      const dynamoDB = new DynamoDB.DynamoDB({})
       const transactWriteRequest = new TransactWriteRequest(dynamoDB)
       expect(transactWriteRequest.dynamoDB).toBe(dynamoDB)
 
-      const transactWriteRequest2 = new TransactWriteRequest()
+      const transactWriteRequest2 = new TransactWriteRequest(new DynamoDB.DynamoDB({}))
       expect(transactWriteRequest2.dynamoDB).not.toBe(dynamoDB)
     })
   })
@@ -37,7 +38,7 @@ describe('TransactWriteRequest', () => {
   describe('transact', () => {
     let req: TransactWriteRequest
     beforeEach(() => {
-      req = new TransactWriteRequest()
+      req = new TransactWriteRequest(new DynamoDB.DynamoDB({}))
     })
 
     it('should throw when no operations are provided', () => {
@@ -53,15 +54,15 @@ describe('TransactWriteRequest', () => {
   describe('correct params', () => {
     let req: TransactWriteRequest
 
-    beforeEach(() => (req = new TransactWriteRequest()))
+    beforeEach(() => (req = new TransactWriteRequest(new DynamoDB.DynamoDB({}))))
 
     it('returnConsumedCapacity', () => {
-      req.returnConsumedCapacity('TOTAL')
+      req.returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)
       expect(req.params.ReturnConsumedCapacity).toBe('TOTAL')
     })
 
     it('returnItemCollectionMetrics', () => {
-      req.returnItemCollectionMetrics('SIZE')
+      req.returnItemCollectionMetrics(ReturnItemCollectionMetrics.SIZE)
       expect(req.params.ReturnItemCollectionMetrics).toBe('SIZE')
     })
 
@@ -134,28 +135,28 @@ describe('TransactWriteRequest', () => {
 
   describe('execFullResponse / exec', () => {
     let req: TransactWriteRequest
-    let transactWriteItemsSpy: jasmine.Spy
+    let transactWriteItemsMock: jest.Mock
 
     beforeEach(() => {
-      req = new TransactWriteRequest()
+      req = new TransactWriteRequest(new DynamoDB.DynamoDB({}))
 
-      transactWriteItemsSpy = jasmine.createSpy().and.returnValue(Promise.resolve({ myResponse: true }))
-      Object.assign(req, { dynamoDBWrapper: { transactWriteItems: transactWriteItemsSpy } })
+      transactWriteItemsMock = jest.fn().mockReturnValueOnce(Promise.resolve({ myResponse: true }))
+      Object.assign(req, { dynamoDBWrapper: { transactWriteItems: transactWriteItemsMock } })
 
       req.transact(new TransactDelete(SimpleWithPartitionKeyModel, 'myId'))
     })
 
     it('execFullResponse should call dynamoDBWrapper.transactWriteItems with the params and return the response', async () => {
       const response = await req.execFullResponse()
-      expect(transactWriteItemsSpy).toHaveBeenCalledTimes(1)
-      expect(transactWriteItemsSpy.calls.mostRecent().args[0]).toEqual(req.params)
+      expect(transactWriteItemsMock).toHaveBeenCalledTimes(1)
+      expect(transactWriteItemsMock).toHaveBeenLastCalledWith(req.params)
       expect(response).toEqual({ myResponse: true })
     })
 
     it('exec should call dynamoDBWrapper.transactWriteItems with the params and return void', async () => {
       const response = await req.exec()
-      expect(transactWriteItemsSpy).toHaveBeenCalledTimes(1)
-      expect(transactWriteItemsSpy.calls.mostRecent().args[0]).toEqual(req.params)
+      expect(transactWriteItemsMock).toHaveBeenCalledTimes(1)
+      expect(transactWriteItemsMock).toHaveBeenLastCalledWith(req.params)
       expect(response).toBeUndefined()
     })
   })

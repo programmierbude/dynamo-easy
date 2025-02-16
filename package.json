@@ -29,22 +29,23 @@
   },
   "license": "MIT",
   "author": "Michael Wittwer <michael.wittwer@shiftcode.ch>",
+  "main": "./dist/dynamo-easy.js",
+  "module": "./dist/_esm2022/dynamo-easy.js",
+  "typings": "./dist/_types/dynamo-easy.d.ts",
   "files": [
     "dist",
     "!dist/docs"
   ],
-  "main": "./dist/dynamo-easy.js",
-  "module": "./dist/_esm5/dynamo-easy.js",
-  "typings": "./dist/_types/dynamo-easy.d.ts",
   "scripts": {
     "prebuild": "rimraf dist",
-    "build": "tsc --outDir ./dist/_esm2015/ && tsc --outDir ./dist/_esm5/ --target es5 && tsc --outDir ./dist/ --module commonjs",
+    "build": "tsc --outDir ./dist/_esm2022/ && tsc --outDir ./dist/ --module commonjs",
     "check-snippets": "npx tsc --outDir ./dist-snippets --project ./snippets/tsconfig.json && rimraf dist-snippets",
     "commity": "commit",
     "docs:build": "rimraf ./dist/docs && typedoc --out dist/docs --readme ./doc-intro.md --target es6 --hideGenerator --theme minimal --excludePrivate --stripInternal --ignoreCompilerErrors",
-    "docs:deploy": "ts-node tools/gh-pages-publish",
+    "docs:deploy": "node tools/gh-pages-publish.mjs",
     "lint": "tslint --project tsconfig.json -t codeFrame --fix",
     "lint:ci": "tslint --project tsconfig.json -t codeFrame",
+    "prepare": "husky install",
     "prettier": "prettier --write --config ./.prettierrc.yml '{src,test}/**/*.ts'",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
     "test": "jest",
@@ -53,38 +54,38 @@
     "tslint:custom-rule:build": "tsc ./tools/tslint/noDynamoNamedImportRule.ts",
     "tslint:custom-rule:test": "tslint --test ./tools/tslint/test"
   },
-  "dependencies": {
-    "tslib": "^1.10.0"
-  },
   "devDependencies": {
-    "@commitlint/cli": "^8.1.0",
-    "@commitlint/config-conventional": "^8.1.0",
-    "@commitlint/prompt-cli": "^8.1.0",
-    "@types/jest": "^25.2.1",
-    "@types/node": "8.10.40",
-    "aws-sdk": "^2.401.0",
-    "colors": "^1.3.3",
-    "coveralls": "^3.0.6",
-    "husky": "^4.0.0",
-    "jest": "^25.2.7",
-    "lint-staged": "^10.0.0",
+    "@aws-sdk/client-dynamodb": "^3.214.0",
+    "@commitlint/cli": "^17.4.2",
+    "@commitlint/config-conventional": "^17.4.2",
+    "@commitlint/prompt-cli": "^17.4.2",
+    "@types/jest": "^29.2.5",
+    "@types/node": "^18.11.18",
+    "colors": "^1.4.0",
+    "coveralls": "^3.1.1",
+    "husky": "^8.0.0",
+    "jest": "^29.3.1",
+    "lint-staged": "^13.1.0",
     "lodash.camelcase": "^4.3.0",
-    "prettier": "^2.0.2",
+    "prettier": "^2.8.3",
     "reflect-metadata": "^0.1.13",
-    "rimraf": "^3.0.0",
-    "semantic-release": "^17.0.0",
-    "sort-package-json": "^1.22.1",
-    "ts-jest": "^25.0.0",
-    "ts-node": "^8.3.0",
+    "rimraf": "^4.1.1",
+    "semantic-release": "^20.0.2",
+    "sort-package-json": "^2.1.0",
+    "ts-jest": "^29.0.5",
     "tslint": "^5.19.0",
     "tslint-config-prettier": "^1.18.0",
-    "tsutils": "^3.17.1",
+    "tsutils": "^3.21.0",
     "typedoc": "0.14.0",
     "typedoc-plugin-external-module-name": "^2.1.0",
-    "typescript": ">=2.9.1 <4.0.0"
+    "typescript": "^5.5.3"
   },
   "peerDependencies": {
-    "aws-sdk": "^2.401.0",
-    "reflect-metadata": "^0.1.12"
+    "@aws-sdk/client-dynamodb": "^3.214.0",
+    "reflect-metadata": "^0.1.12",
+    "tslib": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

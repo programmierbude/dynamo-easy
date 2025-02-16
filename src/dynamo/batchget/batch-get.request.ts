@@ -1,7 +1,7 @@
 /**
  * @module multi-model-requests/batch-get
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { metadataForModel } from '../../decorator/metadata/metadata-for-model.function'
 import { randomExponentialBackoffTimer } from '../../helper/random-exponential-backoff-timer.generator'
 import { createToKeyFn, fromDb } from '../../mapper/mapper'
@@ -18,16 +18,18 @@ import { BatchGetResponse } from './batch-get.response'
  * Request class for the BatchGetItem operation. Read multiple items from one or more tables.
  */
 export class BatchGetRequest {
-  get dynamoDB(): DynamoDB {
+  get dynamoDB(): DynamoDB.DynamoDB {
     return this.dynamoDBWrapper.dynamoDB
   }
 
-  readonly params: DynamoDB.BatchGetItemInput
+  readonly params: DynamoDB.BatchGetItemInput & {
+    RequestItems: NonNullable<DynamoDB.BatchGetItemInput['RequestItems']>
+  }
   private readonly dynamoDBWrapper: DynamoDbWrapper
   private readonly tables: Map<string, ModelConstructor<any>> = new Map()
   private itemCounter = 0
 
-  constructor(dynamoDB?: DynamoDB) {
+  constructor(dynamoDB: DynamoDB.DynamoDB) {
     this.dynamoDBWrapper = new DynamoDbWrapper(dynamoDB)
     this.params = {
       RequestItems: {},

@@ -1,7 +1,7 @@
 /**
  * @module store-requests
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { promiseTap } from '../../../helper/promise-tap.function'
 import { createLogger, Logger } from '../../../logger/logger'
 import { createKeyAttributes, fromDb } from '../../../mapper/mapper'
@@ -15,7 +15,12 @@ import { GetResponse } from './get.response'
 /**
  * Request class for the GetItem operation.
  */
-export class GetRequest<T, T2 = T> extends StandardRequest<T, T2, DynamoDB.GetItemInput, GetRequest<T, T2>> {
+export class GetRequest<T, T2 extends Partial<T> = T> extends StandardRequest<
+  T,
+  T2,
+  DynamoDB.GetItemInput,
+  GetRequest<T, T2>
+> {
   private readonly logger: Logger
 
   constructor(dynamoDBWrapper: DynamoDbWrapper, modelClazz: ModelConstructor<T>, partitionKey: any, sortKey?: any) {
@@ -47,7 +52,9 @@ export class GetRequest<T, T2 = T> extends StandardRequest<T, T2, DynamoDB.GetIt
       .getItem(this.params)
       .then(promiseTap((response) => this.logger.debug('response', response)))
       .then((getItemResponse) => {
-        const response: GetResponse<T2> = <any>{ ...getItemResponse }
+        // TODO v3: investigate on how to remove any
+        // tslint:disable-next-line:no-unnecessary-type-assertion
+        const response: GetResponse<T2> = { ...(getItemResponse as any) }
 
         if (getItemResponse.Item) {
           response.Item = fromDb(<Attributes<T2>>getItemResponse.Item, <any>this.modelClazz)

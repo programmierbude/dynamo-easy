@@ -1,4 +1,4 @@
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import {
   ComplexModel,
   Info,
@@ -22,9 +22,9 @@ describe('update request', () => {
       expect(request.params).toBeDefined()
       const key = request.params.Key
       expect(key).toBeDefined()
-      expect(Object.keys(key).length).toBe(1)
-      expect(key.id).toBeDefined()
-      expect(key.id).toEqual({ S: 'myId' })
+      expect(Object.keys(key ?? {}).length).toBe(1)
+      expect(key?.id).toBeDefined()
+      expect(key?.id).toEqual({ S: 'myId' })
     })
 
     it('composite key', () => {
@@ -34,13 +34,13 @@ describe('update request', () => {
       expect(request.params).toBeDefined()
       const key = request.params.Key
       expect(key).toBeDefined()
-      expect(Object.keys(key).length).toBe(2)
+      expect(Object.keys(key ?? {}).length).toBe(2)
 
-      expect(key.id).toBeDefined()
-      expect(key.id).toEqual({ S: 'myId' })
+      expect(key?.id).toBeDefined()
+      expect(key?.id).toEqual({ S: 'myId' })
 
-      expect(key.creationDate).toBeDefined()
-      expect(key.creationDate).toEqual({ S: now.toISOString() })
+      expect(key?.creationDate).toBeDefined()
+      expect(key?.creationDate).toEqual({ S: now.toISOString() })
     })
 
     it('should throw when no sortKey was given but necessary', () => {
@@ -203,30 +203,30 @@ describe('update request', () => {
 
   describe('logger', () => {
     const sampleResponse: DynamoDB.UpdateItemOutput = { Attributes: undefined }
-    let logReceiver: jasmine.Spy
-    let updateItemSpy: jasmine.Spy
+    let logReceiverMock: jest.Mock
+    let updateItemMock: jest.Mock
     let req: UpdateRequest<SimpleWithPartitionKeyModel>
 
     beforeEach(() => {
-      logReceiver = jasmine.createSpy()
-      updateItemSpy = jasmine.createSpy().and.returnValue(Promise.resolve(sampleResponse))
-      updateDynamoEasyConfig({ logReceiver })
-      req = new UpdateRequest(<any>{ updateItem: updateItemSpy }, SimpleWithPartitionKeyModel, 'id')
+      logReceiverMock = jest.fn()
+      updateItemMock = jest.fn().mockReturnValueOnce(Promise.resolve(sampleResponse))
+      updateDynamoEasyConfig({ logReceiver: logReceiverMock })
+      req = new UpdateRequest(<any>{ updateItem: updateItemMock }, SimpleWithPartitionKeyModel, 'id')
       req.operations(update2(SimpleWithPartitionKeyModel, 'age').set(10))
     })
 
     it('exec should log params and response', async () => {
       await req.exec()
-      expect(logReceiver).toHaveBeenCalled()
-      const logInfoData = logReceiver.calls.allArgs().map((i) => i[0].data)
+      expect(logReceiverMock).toHaveBeenCalled()
+      const logInfoData = logReceiverMock.mock.calls.map((i: any) => i[0].data)
       expect(logInfoData.includes(req.params)).toBeTruthy()
       expect(logInfoData.includes(sampleResponse)).toBeTruthy()
     })
 
     it('execFullResponse should log params and response', async () => {
       await req.execFullResponse()
-      expect(logReceiver).toHaveBeenCalled()
-      const logInfoData = logReceiver.calls.allArgs().map((i) => i[0].data)
+      expect(logReceiverMock).toHaveBeenCalled()
+      const logInfoData = logReceiverMock.mock.calls.map((i: any) => i[0].data)
       expect(logInfoData.includes(req.params)).toBeTruthy()
       expect(logInfoData.includes(sampleResponse)).toBeTruthy()
     })

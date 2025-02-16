@@ -1,7 +1,7 @@
 /**
  * @module multi-model-requests/batch-write
  */
-import * as DynamoDB from 'aws-sdk/clients/dynamodb'
+import * as DynamoDB from '@aws-sdk/client-dynamodb'
 import { randomExponentialBackoffTimer } from '../../helper/random-exponential-backoff-timer.generator'
 import { createToKeyFn, toDb } from '../../mapper/mapper'
 import { ModelConstructor } from '../../model/model-constructor'
@@ -14,15 +14,15 @@ import { BATCH_WRITE_DEFAULT_TIME_SLOT, BATCH_WRITE_MAX_REQUEST_ITEM_COUNT } fro
  * Request class for the BatchWriteItem operation. Put or delete multiple items in one or more table.
  */
 export class BatchWriteRequest {
-  get dynamoDB(): DynamoDB {
+  get dynamoDB(): DynamoDB.DynamoDB {
     return this.dynamoDBWrapper.dynamoDB
   }
 
-  readonly params: DynamoDB.BatchWriteItemInput
+  readonly params: DynamoDB.BatchWriteItemInput & { RequestItems: Record<string, DynamoDB.WriteRequest[]> }
   private readonly dynamoDBWrapper: DynamoDbWrapper
   private itemCount = 0
 
-  constructor(dynamoDB?: DynamoDB) {
+  constructor(dynamoDB: DynamoDB.DynamoDB) {
     this.dynamoDBWrapper = new DynamoDbWrapper(dynamoDB)
     this.params = {
       RequestItems: {},
@@ -88,7 +88,7 @@ export class BatchWriteRequest {
     return this.write(backoffTimer, throttleTimeSlot)
   }
 
-  private requestItems(modelClazz: ModelConstructor<any>, items: DynamoDB.WriteRequests) {
+  private requestItems(modelClazz: ModelConstructor<any>, items: DynamoDB.WriteRequest[]) {
     if (this.itemCount + items.length > BATCH_WRITE_MAX_REQUEST_ITEM_COUNT) {
       throw new Error(`batch write takes at max ${BATCH_WRITE_MAX_REQUEST_ITEM_COUNT} items`)
     }

@@ -7,7 +7,7 @@
       "reflect-metadata"
     ],
     "paths": {
-      "@shiftcoders/*": [
+      "@progbu/*": [
         "../src/*"
       ]
     }

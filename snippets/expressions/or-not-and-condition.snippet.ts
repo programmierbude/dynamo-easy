@@ -1,4 +1,4 @@
-import { and, attribute, DynamoStore, not, or } from '@shiftcoders/dynamo-easy'
+import { and, attribute, DynamoStore, not, or } from '@progbu/dynamo-easy'
 import { Person } from '../models'
 import { DynamoDB } from '@aws-sdk/client-dynamodb'
 

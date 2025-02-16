@@ -1,4 +1,4 @@
-import { Model, GSIPartitionKey, GSISortKey } from '@shiftcoders/dynamo-easy'
+import { Model, GSIPartitionKey, GSISortKey } from '@progbu/dynamo-easy'
 
 const MY_MODEL_GSI = 'NameOfGSI'
 

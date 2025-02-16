@@ -1,4 +1,4 @@
-import { attribute, DynamoStore, or, update } from '@shiftcoders/dynamo-easy'
+import { attribute, DynamoStore, or, update } from '@progbu/dynamo-easy'
 import { AnotherModel } from '../models'
 import { DynamoDB } from '@aws-sdk/client-dynamodb'
 

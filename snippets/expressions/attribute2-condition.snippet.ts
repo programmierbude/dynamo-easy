@@ -1,5 +1,5 @@
 import {DynamoDB} from '@aws-sdk/client-dynamodb'
-import { attribute2, DynamoStore } from '@shiftcoders/dynamo-easy'
+import { attribute2, DynamoStore } from '@progbu/dynamo-easy'
 import { Person } from '../models'
 
 const personStore = new DynamoStore(Person, new DynamoDB({}))

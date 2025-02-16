@@ -1,4 +1,4 @@
-import { updateDynamoEasyConfig } from '@shiftcoders/dynamo-easy'
+import { updateDynamoEasyConfig } from '@progbu/dynamo-easy'
 
 updateDynamoEasyConfig({
   sessionValidityEnsurer: (): Promise<void> => {

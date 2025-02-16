@@ -1,4 +1,4 @@
-import { Model, Transient } from '@shiftcoders/dynamo-easy'
+import { Model, Transient } from '@progbu/dynamo-easy'
 
 @Model()
 class MyModel {

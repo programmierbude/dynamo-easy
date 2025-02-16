@@ -1,4 +1,4 @@
-import { TransactGetRequest } from '@shiftcoders/dynamo-easy'
+import { TransactGetRequest } from '@progbu/dynamo-easy'
 import { AnotherModel, Person } from '../models'
 import { DynamoDB, ReturnConsumedCapacity } from '@aws-sdk/client-dynamodb'
 

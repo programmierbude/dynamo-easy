@@ -1,4 +1,4 @@
-import { LogInfo, updateDynamoEasyConfig } from '@shiftcoders/dynamo-easy'
+import { LogInfo, updateDynamoEasyConfig } from '@progbu/dynamo-easy'
 
 updateDynamoEasyConfig({
   logReceiver: (logInfo: LogInfo) => {

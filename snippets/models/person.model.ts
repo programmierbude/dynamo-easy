@@ -1,4 +1,4 @@
-import { Model, PartitionKey } from '@shiftcoders/dynamo-easy'
+import { Model, PartitionKey } from '@progbu/dynamo-easy'
 
 @Model()
 export class Person {

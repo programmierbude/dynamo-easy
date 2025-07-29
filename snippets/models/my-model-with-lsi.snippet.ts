@@ -1,4 +1,4 @@
-import { Model, LSISortKey, PartitionKey, SortKey } from '@shiftcoders/dynamo-easy'
+import { Model, LSISortKey, PartitionKey, SortKey } from '@progbu/dynamo-easy'
 
 @Model()
 class MyModel {

@@ -1,5 +1,5 @@
 import {DynamoDB} from '@aws-sdk/client-dynamodb'
-import { DynamoStore } from '@shiftcoders/dynamo-easy'
+import { DynamoStore } from '@progbu/dynamo-easy'
 import { Person } from './models'
 
 // update the aws config with your credentials to enable successful connection

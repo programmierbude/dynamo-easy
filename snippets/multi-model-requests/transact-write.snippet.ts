@@ -5,7 +5,7 @@ import {
   TransactPut,
   TransactUpdate,
   TransactWriteRequest,
-} from '@shiftcoders/dynamo-easy'
+} from '@progbu/dynamo-easy'
 import { AnotherModel, Person } from '../models'
 import { DynamoDB } from '@aws-sdk/client-dynamodb'
 

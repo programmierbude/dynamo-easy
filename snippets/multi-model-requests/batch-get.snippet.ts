@@ -1,4 +1,4 @@
-import { BatchGetRequest, BatchGetResponse } from '@shiftcoders/dynamo-easy'
+import { BatchGetRequest, BatchGetResponse } from '@progbu/dynamo-easy'
 import { AnotherModel, Person } from '../models'
 import { DynamoDB } from '@aws-sdk/client-dynamodb'
 

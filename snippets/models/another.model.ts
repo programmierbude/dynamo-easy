@@ -1,4 +1,4 @@
-import { CollectionProperty, DateProperty, Model, PartitionKey, SortKey } from '@shiftcoders/dynamo-easy'
+import { CollectionProperty, DateProperty, Model, PartitionKey, SortKey } from '@progbu/dynamo-easy'
 
 @Model()
 export class AnotherModel {

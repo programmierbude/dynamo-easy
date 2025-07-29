@@ -1,6 +1,6 @@
 {
-  "name": "@shiftcoders/dynamo-easy",
-  "version": "0.0.0",
+  "name": "@progbu/dynamo-easy",
+  "version": "1.0.1",
   "description": "DynamoDB client for NodeJS and browser with a fluent api to build requests. We take care of the type mapping between JS and DynamoDB, customizable trough typescript decorators.",
   "keywords": [
     "api",

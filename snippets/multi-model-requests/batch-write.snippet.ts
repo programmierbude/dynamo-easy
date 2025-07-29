@@ -1,4 +1,4 @@
-import { BatchWriteRequest } from '@shiftcoders/dynamo-easy'
+import { BatchWriteRequest } from '@progbu/dynamo-easy'
 import { AnotherModel, Person } from '../models'
 import { DynamoDB, ReturnConsumedCapacity } from '@aws-sdk/client-dynamodb'
 

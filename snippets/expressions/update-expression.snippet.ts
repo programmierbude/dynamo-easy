@@ -1,4 +1,4 @@
-import { DynamoStore, update } from '@shiftcoders/dynamo-easy'
+import { DynamoStore, update } from '@progbu/dynamo-easy'
 import { Person } from '../models'
 import { DynamoDB } from '@aws-sdk/client-dynamodb'
 
